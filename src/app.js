@@ -23,26 +23,39 @@ app.get('/', (req, res) => {
 // Added: mount authentication routes (register, login, protected /me)
 app.use('/api/auth', authRoutes);
 
+const { verifyToken } = require('./utils/token');
+
 const onlineUsers = new Map();
 
-io.on('connection', (socket) => {
-  console.log('A user connected:', socket.id);
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token || socket.handshake.query.token;
 
-  socket.on('user:join', (userId) => {
-    onlineUsers.set(userId, socket.id);
-    socket.userId = userId;
-    io.emit('user:online', userId);
-    console.log(`User ${userId} is online`);
-  });
+  if (!token) {
+    return next(new Error('Authentication error: no token provided'));
+  }
+
+  try {
+    const decoded = verifyToken(token);
+    socket.userId = decoded.id;
+    next();
+  } catch (err) {
+    next(new Error('Authentication error: invalid or expired token'));
+  }
+});
+
+io.on('connection', (socket) => {
+  console.log('A user connected:', socket.id, '| userId:', socket.userId);
+
+  onlineUsers.set(socket.userId, socket.id);
+  io.emit('user:online', socket.userId);
 
   socket.on('disconnect', () => {
-    if (socket.userId) {
-      onlineUsers.delete(socket.userId);
-      io.emit('user:offline', socket.userId);
-      console.log(`User ${socket.userId} is offline`);
-    }
+    onlineUsers.delete(socket.userId);
+    io.emit('user:offline', socket.userId);
+    console.log(`User ${socket.userId} is offline`);
   });
 });
+
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {

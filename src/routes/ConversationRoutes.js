@@ -5,12 +5,11 @@ const {
     getConversations
 } = require('../controllers/ConversationController');
 
+const { protect } = require('../middleware/auth.js');
+
 const router = express.Router();
 
-// Create a conversation
-router.post('/', createConversation);
-
-// Get all conversations for logged-in user
-router.get('/', getConversations);
+router.post('/', protect, createConversation);
+router.get('/', protect, getConversations);
 
 module.exports = router;

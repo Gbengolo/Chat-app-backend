@@ -26,7 +26,7 @@ const createConversation = async (req, res) => {
             return res.status(200).json({
                 success: true,
                 message: 'Conversation already exists',
-                conversation: existingConversation
+                data: existingConversation
             });
         }
 
@@ -38,7 +38,7 @@ const createConversation = async (req, res) => {
         return res.status(201).json({
             success: true,
             message: 'Conversation created successfully',
-            conversation
+            data: conversation
         });
 
     } catch (error) {
@@ -66,7 +66,7 @@ const getConversations = async (req, res) => {
         return res.status(200).json({
             success: true,
             count: conversations.length,
-            conversations
+            data: conversations
         });
 
     } catch (error) {

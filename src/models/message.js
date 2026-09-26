@@ -1,28 +1,62 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const messageSchema = new mongoose.Schema(
-    {
-        conversation: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Conversation',
-            required: true
-        },
-
-        sender: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
-            required: true
-        },
-
-        content: {
-            type: String,
-            required: true,
-            trim: true
-        }
+const recipientStatusSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      index: true,
     },
-    {
-        timestamps: true
-    }
+
+    status: {
+      type: String,
+      enum: ["sent", "delivered", "read"],
+      default: "sent",
+    },
+
+    deliveredAt: {
+      type: Date,
+      default: null,
+    },
+
+    readAt: {
+      type: Date,
+      default: null,
+    },
+  },
+  {
+    _id: false,
+  }
 );
 
-module.exports = mongoose.model('Message', messageSchema);
+const messageSchema = new mongoose.Schema(
+  {
+    conversationId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      index: true,
+    },
+
+    senderId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      index: true,
+    },
+
+    content: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    recipientStatuses: {
+      type: [recipientStatusSchema],
+      default: [],
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+module.exports = mongoose.model("Message", messageSchema);

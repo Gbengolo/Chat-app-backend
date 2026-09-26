@@ -1,5 +1,6 @@
-const Message = require('../models/message');
+const Message = require('../models/Message');
 const Conversation = require('../models/Conversation');
+const { createMessage } = require('../services/messageService');
 
 // Send a message
 const sendMessage = async (req, res) => {
@@ -15,38 +16,11 @@ const sendMessage = async (req, res) => {
 
         const currentUserId = req.user._id;
 
-        // Check if the conversation exists
-        const conversation = await Conversation.findById(conversationId);
-
-        if (!conversation) {
-            return res.status(404).json({
-                success: false,
-                message: 'Conversation not found'
-            });
-        }
-
-        // Check if the logged-in user belongs to the conversation
-        const isParticipant = conversation.participants.some(
-            participant => participant.toString() === currentUserId.toString()
-        );
-
-        if (!isParticipant) {
-            return res.status(403).json({
-                success: false,
-                message: 'You are not a participant in this conversation'
-            });
-        }
-
-        // Create the message
-        const message = await Message.create({
-            conversation: conversationId,
-            sender: currentUserId,
+        const message = await createMessage(
+            conversationId,
+            currentUserId,
             content
-        });
-
-        // Update conversation's updatedAt time
-        conversation.updatedAt = new Date();
-        await conversation.save();
+        );
 
         return res.status(201).json({
             success: true,
@@ -55,14 +29,12 @@ const sendMessage = async (req, res) => {
         });
 
     } catch (error) {
-        return res.status(500).json({
+        return res.status(400).json({
             success: false,
-            message: 'Failed to send message',
-            error: error.message
+            message: error.message
         });
     }
 };
-
 
 // Get message history
 const getMessages = async (req, res) => {
@@ -74,7 +46,6 @@ const getMessages = async (req, res) => {
 
         const skip = (page - 1) * limit;
 
-        // Check if conversation exists
         const conversation = await Conversation.findById(conversationId);
 
         if (!conversation) {
@@ -86,9 +57,9 @@ const getMessages = async (req, res) => {
 
         const currentUserId = req.user._id;
 
-        // Check if user belongs to the conversation
         const isParticipant = conversation.participants.some(
-            participant => participant.toString() === currentUserId.toString()
+            participant =>
+                participant.toString() === currentUserId.toString()
         );
 
         if (!isParticipant) {
@@ -98,18 +69,15 @@ const getMessages = async (req, res) => {
             });
         }
 
-        // Get messages
         const messages = await Message.find({
-            conversation: conversationId
+            conversationId: conversationId
         })
             .sort({ createdAt: -1 })
             .skip(skip)
-            .limit(limit)
-            .populate('sender', 'name email');
+            .limit(limit);
 
-        // Get total number of messages
         const totalMessages = await Message.countDocuments({
-            conversation: conversationId
+            conversationId: conversationId
         });
 
         return res.status(200).json({
@@ -118,7 +86,7 @@ const getMessages = async (req, res) => {
             limit,
             totalMessages,
             totalPages: Math.ceil(totalMessages / limit),
-            messages
+            data: messages
         });
 
     } catch (error) {
@@ -129,7 +97,6 @@ const getMessages = async (req, res) => {
         });
     }
 };
-
 
 module.exports = {
     sendMessage,

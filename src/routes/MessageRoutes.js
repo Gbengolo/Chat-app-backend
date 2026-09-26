@@ -5,12 +5,11 @@ const {
     getMessages
 } = require('../controllers/MessageController');
 
+const { protect } = require('../middleware/auth');
+
 const router = express.Router();
 
-// Send a message
-router.post('/', sendMessage);
-
-// Get message history
-router.get('/:conversationId', getMessages);
+router.post('/', protect, sendMessage);
+router.get('/:conversationId', protect, getMessages);
 
 module.exports = router;

@@ -8,7 +8,7 @@ const MessageRoutes = require('./routes/MessageRoutes');
 
 app.use(express.json());
 
-app.use('/api/Conversations',ConversationRoutes);
+app.use('/api/conversations',ConversationRoutes);
 app.use('/api/messages', MessageRoutes);
 
 

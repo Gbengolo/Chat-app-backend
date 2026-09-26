@@ -1,8 +1,9 @@
 require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
 const http = require('http');
 const { Server } = require('socket.io');
+const connectDB = require('./config/db');
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -10,15 +11,17 @@ const io = new Server(server, {
   cors: { origin: '*' }
 });
 
-app.use(express.json());
+// Added: connect to MongoDB on server startup
+connectDB();
 
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB connected'))
-  .catch((err) => console.error('MongoDB connection error:', err));
+app.use(express.json());
 
 app.get('/', (req, res) => {
   res.json({ success: true, message: 'Server is running' });
 });
+
+// Added: mount authentication routes (register, login, protected /me)
+app.use('/api/auth', authRoutes);
 
 const onlineUsers = new Map();
 

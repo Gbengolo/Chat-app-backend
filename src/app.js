@@ -49,13 +49,30 @@ io.on('connection', (socket) => {
   onlineUsers.set(socket.userId, socket.id);
   io.emit('user:online', socket.userId);
 
+  socket.on('conversation:join', (conversationId) => {
+    socket.join(conversationId);
+  });
+
+  socket.on('typing:start', (conversationId) => {
+    socket.to(conversationId).emit('typing:start', {
+      userId: socket.userId,
+      conversationId,
+    });
+  });
+
+  socket.on('typing:stop', (conversationId) => {
+    socket.to(conversationId).emit('typing:stop', {
+      userId: socket.userId,
+      conversationId,
+    });
+  });
+
   socket.on('disconnect', () => {
     onlineUsers.delete(socket.userId);
     io.emit('user:offline', socket.userId);
     console.log(`User ${socket.userId} is offline`);
   });
 });
-
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {

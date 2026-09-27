@@ -3,65 +3,22 @@ const {
   markAsRead,
 } = require('../services/messageService');
 
-const connectedUsers = new Map();
-
-const addUserSocket = (userId, socketId) => {
-  if (!connectedUsers.has(userId)) {
-    connectedUsers.set(userId, new Set());
-  }
-
-  connectedUsers.get(userId).add(socketId);
-};
-
-const removeUserSocket = (userId, socketId) => {
-  const userSockets = connectedUsers.get(userId);
-
-  if (!userSockets) {
-    return;
-  }
-
-  userSockets.delete(socketId);
-
-  if (userSockets.size === 0) {
-    connectedUsers.delete(userId);
-  }
-};
-
-const emitToUser = (io, userId, event, data) => {
-  const userSockets = connectedUsers.get(userId);
-
-  if (!userSockets) {
-    return;
-  }
-
-  userSockets.forEach((socketId) => {
-    io.to(socketId).emit(event, data);
-  });
-};
-
-const initializeSocket = (io) => {
+const initializeSocket = (io, onlineUsers) => {
   io.on('connection', (socket) => {
-    console.log(`Socket connected: ${socket.id}`);
+    console.log(
+      `Socket connected: ${socket.id} | userId: ${socket.userId}`
+    );
 
-    socket.on('user:online', (userId) => {
-      if (!userId) {
-        return;
-      }
-
-      socket.userId = userId.toString();
-
-      addUserSocket(socket.userId, socket.id);
-
-      console.log(`User ${socket.userId} is online`);
-    });
+    // so I have removed the duplicate authentication/online tracking.
+    // so this socketHandler doesn't track who's online, since the app.js already owns Presence.
 
     socket.on('message:delivered', async (data = {}) => {
       try {
         const { messageId } = data;
 
-        if (!messageId || !socket.userId) {
+        if (!messageId) {
           return socket.emit('message:status:error', {
-            message: 'messageId and authenticated user are required',
+            message: 'messageId is required',
           });
         }
 
@@ -72,18 +29,17 @@ const initializeSocket = (io) => {
 
         const senderId = result.message.senderId.toString();
 
-        emitToUser(
-          io,
-          senderId,
-          'message:status',
-          {
+        const senderSocketId = onlineUsers.get(senderId);
+
+        if (senderSocketId) {
+          io.to(senderSocketId).emit('message:status', {
             messageId: result.message._id.toString(),
             userId: socket.userId,
             status: result.recipient.status,
             deliveredAt: result.recipient.deliveredAt,
             readAt: result.recipient.readAt,
-          }
-        );
+          });
+        }
       } catch (error) {
         socket.emit('message:status:error', {
           message: error.message,
@@ -95,9 +51,9 @@ const initializeSocket = (io) => {
       try {
         const { messageId } = data;
 
-        if (!messageId || !socket.userId) {
+        if (!messageId) {
           return socket.emit('message:status:error', {
-            message: 'messageId and authenticated user are required',
+            message: 'messageId is required',
           });
         }
 
@@ -108,18 +64,17 @@ const initializeSocket = (io) => {
 
         const senderId = result.message.senderId.toString();
 
-        emitToUser(
-          io,
-          senderId,
-          'message:status',
-          {
+        const senderSocketId = onlineUsers.get(senderId);
+
+        if (senderSocketId) {
+          io.to(senderSocketId).emit('message:status', {
             messageId: result.message._id.toString(),
             userId: socket.userId,
             status: result.recipient.status,
             deliveredAt: result.recipient.deliveredAt,
             readAt: result.recipient.readAt,
-          }
-        );
+          });
+        }
       } catch (error) {
         socket.emit('message:status:error', {
           message: error.message,
@@ -128,16 +83,9 @@ const initializeSocket = (io) => {
     });
 
     socket.on('disconnect', () => {
-      if (socket.userId) {
-        removeUserSocket(
-          socket.userId,
-          socket.id
-        );
-
-        console.log(
-          `User ${socket.userId} disconnected`
-        );
-      }
+      console.log(
+        `Socket disconnected: ${socket.id} | userId: ${socket.userId}`
+      );
     });
   });
 };

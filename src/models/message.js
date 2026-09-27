@@ -1,17 +1,18 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const recipientStatusSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
       index: true,
     },
 
     status: {
       type: String,
-      enum: ['sent', 'delivered', 'read'],
-      default: 'sent',
+      enum: ["sent", "delivered", "read"],
+      default: "sent",
     },
 
     deliveredAt: {
@@ -33,12 +34,14 @@ const messageSchema = new mongoose.Schema(
   {
     conversationId: {
       type: mongoose.Schema.Types.ObjectId,
+      ref: "conversation",
       required: true,
       index: true,
     },
 
     senderId: {
       type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
       index: true,
     },
@@ -59,4 +62,4 @@ const messageSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model('Message', messageSchema);
+module.exports = mongoose.model("Message", messageSchema);

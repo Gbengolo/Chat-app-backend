@@ -9,7 +9,7 @@ const sendMessage = async (req, res) => {
     const { conversationId } = req.params;
     const { content } = req.body;
 
-    // We'll eventually get this from authentication middleware.
+    // authentication middleware now implemented (gotten from your main branch).
     const senderId = req.user.id;
 
     if (!content || !content.trim()) {

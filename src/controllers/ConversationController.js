@@ -1,4 +1,4 @@
-const Conversation = require('../models/Conversation');
+const Conversation = require('../models/conversation');
 
 // Create a new conversation
 const createConversation = async (req, res) => {
@@ -60,7 +60,7 @@ const getConversations = async (req, res) => {
         const conversations = await Conversation.find({
             participants: currentUserId
         })
-            .populate('participants', 'name email')
+            .populate('participants', 'username email')
             .sort({ updatedAt: -1 });
 
         return res.status(200).json({

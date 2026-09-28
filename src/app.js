@@ -5,17 +5,28 @@ const express = require('express');
 const { Server } = require('socket.io');
 
 const connectDB = require('./config/db');
+
 const authRoutes = require('./routes/authRoutes');
 const messageRoutes = require('./routes/messageRoutes');
 
 const { verifyToken } = require('./utils/token');
-
 const initializeSocket = require('./socket/socketHandler');
 
 const app = express();
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+  },
+});
+
+// Connect to MongoDB
+connectDB();
 
 app.use(express.json());
 
+// Test route
 app.get('/', (req, res) => {
   res.json({
     success: true,
@@ -23,25 +34,16 @@ app.get('/', (req, res) => {
   });
 });
 
+// Authentication routes
 app.use('/api/auth', authRoutes);
+
+// Message and read-receipt routes
 app.use('/api', messageRoutes);
 
-const httpServer = http.createServer(app);
-
-const io = new Server(httpServer, {
-  cors: {
-    origin: '*',
-  },
-});
-
-
-  // Socket.IO online users
-
+// Shared online users map
 const onlineUsers = new Map();
 
-
- // The Socket.IO authentication you implemented
- 
+// Socket authentication
 io.use((socket, next) => {
   const token =
     socket.handshake.auth.token || socket.handshake.query.token;
@@ -67,9 +69,7 @@ io.use((socket, next) => {
   }
 });
 
-
-  // The Presence system
-
+// Presence / connection handling
 io.on('connection', (socket) => {
   console.log(
     'A user connected:',
@@ -82,10 +82,12 @@ io.on('connection', (socket) => {
 
   io.emit('user:online', socket.userId);
 
+  // Join conversation room
   socket.on('conversation:join', (conversationId) => {
     socket.join(conversationId);
   });
 
+  // Typing indicators
   socket.on('typing:start', (conversationId) => {
     socket.to(conversationId).emit('typing:start', {
       userId: socket.userId,
@@ -100,6 +102,7 @@ io.on('connection', (socket) => {
     });
   });
 
+  // User disconnects
   socket.on('disconnect', () => {
     onlineUsers.delete(socket.userId);
 
@@ -111,18 +114,11 @@ io.on('connection', (socket) => {
   });
 });
 
-
- // The Read receipts & message status from my socketHandler
+// Initialize read-receipt/message-status socket handlers
 initializeSocket(io, onlineUsers);
 
 const PORT = process.env.PORT || 5000;
 
-const startServer = async () => {
-  await connectDB();
-
-  httpServer.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-  });
-};
-
-startServer();
+server.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});

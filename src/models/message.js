@@ -34,7 +34,7 @@ const messageSchema = new mongoose.Schema(
   {
     conversationId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "conversation",
+      ref: "Conversation",
       required: true,
       index: true,
     },

@@ -1,0 +1,9 @@
+[0927/204134.153:ERROR:third_party\crashpad\crashpad\util\win\registration_protocol_win.cc:108] CreateFile: The system cannot find the file specified. (0x2)
+[0927/204134.981:ERROR:electron\shell\common\node_util.cc:148] Failed to initialize Node.js. {
+   "args": [ "C:\\Program Files\\Microsoft VS Code\\Code.exe", "c:\\Program Files\\Microsoft VS Code\\7e7950df89\\resources\\app\\extensions\\json-language-features\\server\\dist\\node\\jsonServerMain", "--node-ipc", "--clientProcessId=6512" ],
+   "location": ", at node:internal/buffer:1104",
+   "message": "Uncaught RangeError: Failed to allocate memory",
+   "source_line": "  return new FastBuffer(createUnsafeArrayBuffer(size));"
+}
+
+[0927/204136.216:ERROR:third_party\crashpad\crashpad\util\win\registration_protocol_win.cc:108] CreateFile: The system cannot find the file specified. (0x2)

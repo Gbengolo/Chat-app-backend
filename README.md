@@ -185,7 +185,7 @@ _(To be completed once deployed — add the platform used and the live API URL h
 | Presence & Sockets | Gbengolo |
 | Conversations & Messages | Aderonke |
 | Read Receipts & Message Status | sirmoel |
-| Validation, Docs & Testing | TBD |
+| Validation, Docs & Testing | Gbengolo (interim) |
 
 ## Group
 

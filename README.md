@@ -135,8 +135,10 @@ Errors follow the same shape with `"success": false` and `"data": null`.
 |---|---|---|---|
 | POST | `/api/conversations` | Create or fetch a conversation | Yes |
 | GET | `/api/conversations` | List the logged-in user's conversations | Yes |
-| POST | `/api/messages` | Send a message | Yes |
-| GET | `/api/messages/:conversationId` | Get message history (paginated) | Yes |
+| POST | `/api/conversations/:conversationId/messages` | Send a message | Yes |
+| GET | `/api/conversations/:conversationId/messages` | Get message history (paginated) | Yes |
+| PATCH | `/api/messages/:messageId/delivered` | Mark a message as delivered | Yes |
+| PATCH | `/api/messages/:messageId/read` | Mark a message as read | Yes |
 
 Full endpoint documentation (request/response examples, headers) is maintained in our Postman collection — see link in team resources.
 
@@ -172,10 +174,12 @@ node test/socketTest.js
 
 ## Deployment
 
-_(To be completed once deployed — add the platform used and the live API URL here.)_
+- **Platform:** Render (free tier)
+- **Live API URL:** https://chat-app-backend-ukcp.onrender.com
 
-- **Platform:** TBD (Render / Railway / other)
-- **Live API URL:** TBD
+Note: the free instance spins down after periods of inactivity. The first
+request after idle time can take up to ~50 seconds to respond while the
+server wakes up.
 
 ## Team / Contributions
 
@@ -185,7 +189,7 @@ _(To be completed once deployed — add the platform used and the live API URL h
 | Presence & Sockets | Gbengolo |
 | Conversations & Messages | Aderonke |
 | Read Receipts & Message Status | sirmoel |
-| Validation, Docs & Testing | TBD |
+| Validation, Docs & Testing | Gbengolo (interim) |
 
 ## Group
 

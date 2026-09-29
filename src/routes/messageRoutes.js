@@ -4,6 +4,7 @@ const {
   sendMessage,
   deliverMessage,
   readMessage,
+  getMessages,
 } = require('../controllers/messageController');
 
 const { protect } = require('../middleware/auth');
@@ -14,6 +15,12 @@ router.post(
   '/conversations/:conversationId/messages',
   protect,
   sendMessage
+);
+
+router.get(
+  '/conversations/:conversationId/messages',
+  protect,
+  getMessages
 );
 
 router.patch(

@@ -7,6 +7,7 @@ const { Server } = require('socket.io');
 const connectDB = require('./config/db');
 
 const authRoutes = require('./routes/authRoutes');
+const ConversationRoutes = require('./routes/ConversationRoutes');
 const messageRoutes = require('./routes/messageRoutes');
 
 const { verifyToken } = require('./utils/token');
@@ -36,6 +37,9 @@ app.get('/', (req, res) => {
 
 // Authentication routes
 app.use('/api/auth', authRoutes);
+
+// Conversation routes
+app.use('/api/conversations', ConversationRoutes);
 
 // Message and read-receipt routes
 app.use('/api', messageRoutes);

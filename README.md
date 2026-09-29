@@ -172,10 +172,12 @@ node test/socketTest.js
 
 ## Deployment
 
-_(To be completed once deployed — add the platform used and the live API URL here.)_
+- **Platform:** Render (free tier)
+- **Live API URL:** https://chat-app-backend-ukcp.onrender.com
 
-- **Platform:** TBD (Render / Railway / other)
-- **Live API URL:** TBD
+Note: the free instance spins down after periods of inactivity. The first
+request after idle time can take up to ~50 seconds to respond while the
+server wakes up.
 
 ## Team / Contributions
 

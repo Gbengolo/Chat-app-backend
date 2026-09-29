@@ -7,7 +7,7 @@ const { Server } = require('socket.io');
 const connectDB = require('./config/db');
 
 const authRoutes = require('./routes/authRoutes');
-const ConversationRoutes = require('./conversations/CoversationRoutes')
+const ConversationRoutes = require('./routes/ConversationRoutes');
 const messageRoutes = require('./routes/messageRoutes');
 
 const { verifyToken } = require('./utils/token');

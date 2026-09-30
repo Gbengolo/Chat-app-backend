@@ -140,7 +140,7 @@ Errors follow the same shape with `"success": false` and `"data": null`.
 | PATCH | `/api/messages/:messageId/delivered` | Mark a message as delivered | Yes |
 | PATCH | `/api/messages/:messageId/read` | Mark a message as read | Yes |
 
-Full endpoint documentation (request/response examples, headers) is maintained in our Postman collection — see link in team resources.
+Full endpoint documentation, including request/response examples, is available in the exported Postman collection: [`docs/chat-app-backend.postman_collection.json`](./docs/chat-app-backend.postman_collection.json).
 
 ### Real-Time Events (Socket.IO)
 

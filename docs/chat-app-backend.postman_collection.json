@@ -1,0 +1,518 @@
+{
+  "info": {
+    "name": "Chat app backend",
+    "description": "Real-Time Chat App backend — Group 19 (TS Academy Backend Capstone). Covers Auth, Conversations, Messages, and Read Receipts. Socket.IO events are documented in the README.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://chat-app-backend-ukcp.onrender.com",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"livetest1\",\n  \"email\": \"livetest1@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Registers a new user. Passwords are hashed with bcrypt before saving and are never returned in the response. Returns a JWT on success."
+          },
+          "response": [
+            {
+              "name": "Register - Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"livetest1\",\n  \"email\": \"livetest1@example.com\",\n  \"password\": \"password123\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/register",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "auth", "register"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": true,\n  \"message\": \"User registered successfully\",\n  \"data\": {\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"user\": {\n      \"id\": \"6ab7dece4691086bee24d866\",\n      \"username\": \"livetest1\",\n      \"email\": \"livetest1@example.com\"\n    }\n  }\n}"
+            },
+            {
+              "name": "Register - Duplicate Email",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"livetest1\",\n  \"email\": \"livetest1@example.com\",\n  \"password\": \"password123\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/register",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "auth", "register"]
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Email is already in use\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"livetest1@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Logs an existing user in and returns a JWT. Copy the token from the response into the {{token}} collection variable to use protected endpoints below."
+          },
+          "response": [
+            {
+              "name": "Login - Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"livetest1@example.com\",\n  \"password\": \"password123\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "auth", "login"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Login successful\",\n  \"data\": {\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"user\": {\n      \"id\": \"6ab7dece4691086bee24d866\",\n      \"username\": \"livetest1\",\n      \"email\": \"livetest1@example.com\"\n    }\n  }\n}"
+            },
+            {
+              "name": "Login - Invalid Credentials",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"livetest1@example.com\",\n  \"password\": \"wrongpassword\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "auth", "login"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Invalid email or password\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "me"]
+            },
+            "description": "Returns the currently authenticated user's profile. Requires a valid Bearer token."
+          },
+          "response": [
+            {
+              "name": "Get Me - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/me",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "auth", "me"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": true,\n  \"message\": \"User fetched successfully\",\n  \"data\": {\n    \"user\": {\n      \"id\": \"6ab7dece4691086bee24d866\",\n      \"username\": \"livetest1\",\n      \"email\": \"livetest1@example.com\"\n    }\n  }\n}"
+            },
+            {
+              "name": "Get Me - No Token",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/me",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "auth", "me"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"message\": \"Not authorized, no token provided\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Conversations & Messages",
+      "item": [
+        {
+          "name": "Create Conversation",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"participantId\": \"6abba81ee508ecc614ed867b\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/conversations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "conversations"]
+            },
+            "description": "Creates a new conversation between the logged-in user and the given participantId, or returns the existing one if it already exists."
+          },
+          "response": [
+            {
+              "name": "Create Conversation - Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"participantId\": \"6abba81ee508ecc614ed867b\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/conversations",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "conversations"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Conversation created successfully\",\n  \"data\": {\n    \"participants\": [\n      \"6abba7e7e508ecc614ed867a\",\n      \"6abba81ee508ecc614ed867b\"\n    ],\n    \"lastMessage\": null,\n    \"_id\": \"6abbabafe508ecc614ed867c\",\n    \"createdAt\": \"2026-09-29T12:14:39.060Z\",\n    \"updatedAt\": \"2026-09-29T12:14:39.060Z\",\n    \"__v\": 0\n  }\n}"
+            },
+            {
+              "name": "Create Conversation - Missing participantId",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/conversations",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "conversations"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Participant ID is required\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "List Conversations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/conversations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "conversations"]
+            },
+            "description": "Lists all conversations the logged-in user is a participant in."
+          },
+          "response": [
+            {
+              "name": "List Conversations - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/conversations",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "conversations"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": true,\n  \"count\": 0,\n  \"data\": []\n}"
+            }
+          ]
+        },
+        {
+          "name": "Send Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Hello from the live server!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/conversations/6abbabafe508ecc614ed867c/messages",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "conversations", "6abbabafe508ecc614ed867c", "messages"]
+            },
+            "description": "Sends a message into the given conversation. Requires the sender to be a participant. Sets recipientStatuses to 'sent' for every other participant."
+          },
+          "response": [
+            {
+              "name": "Send Message - Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"content\": \"Hey, My Guy, How your side\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/conversations/6abbabafe508ecc614ed867c/messages",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "conversations", "6abbabafe508ecc614ed867c", "messages"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Message sent successfully\",\n  \"data\": {\n    \"conversationId\": \"6abbabafe508ecc614ed867c\",\n    \"senderId\": \"6abba81ee508ecc614ed867b\",\n    \"content\": \"Hey, My Guy, How your side\",\n    \"recipientStatuses\": [\n      {\n        \"userId\": \"6abba7e7e508ecc614ed867a\",\n        \"status\": \"sent\",\n        \"deliveredAt\": null,\n        \"readAt\": null\n      }\n    ],\n    \"_id\": \"6abbaca5e508ecc614ed867d\",\n    \"createdAt\": \"2026-09-29T12:18:45.287Z\",\n    \"updatedAt\": \"2026-09-29T12:18:45.287Z\",\n    \"__v\": 0\n  }\n}"
+            },
+            {
+              "name": "Send Message - Not a Participant",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"content\": \"Hello\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/conversations/6abbabafe508ecc614ed867c/messages",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "conversations", "6abbabafe508ecc614ed867c", "messages"]
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": false,\n  \"message\": \"You are not a participant in this conversation\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Messages",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/conversations/6abbabafe508ecc614ed867c/messages?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "conversations", "6abbabafe508ecc614ed867c", "messages"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" }
+              ]
+            },
+            "description": "Returns the paginated message history for a conversation, newest first. senderId is populated with username and email."
+          },
+          "response": [
+            {
+              "name": "Get Messages - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/conversations/6abbabafe508ecc614ed867c/messages?page=1&limit=20",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "conversations", "6abbabafe508ecc614ed867c", "messages"],
+                  "query": [
+                    { "key": "page", "value": "1" },
+                    { "key": "limit", "value": "20" }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"_id\": \"6abbaca5e508ecc614ed867d\",\n      \"conversationId\": \"6abbabafe508ecc614ed867c\",\n      \"senderId\": {\n        \"_id\": \"6abba81ee508ecc614ed867b\",\n        \"username\": \"Samuel\",\n        \"email\": \"samuel123@gmail.com\"\n      },\n      \"content\": \"Hey, My Guy, How your side\",\n      \"recipientStatuses\": [\n        {\n          \"userId\": \"6abba7e7e508ecc614ed867a\",\n          \"status\": \"sent\",\n          \"deliveredAt\": null,\n          \"readAt\": null\n        }\n      ],\n      \"createdAt\": \"2026-09-29T12:18:45.287Z\",\n      \"updatedAt\": \"2026-09-29T12:18:45.287Z\",\n      \"__v\": 0\n    }\n  ],\n  \"pagination\": {\n    \"page\": 1,\n    \"limit\": 20,\n    \"total\": 1,\n    \"totalPages\": 1\n  }\n}"
+            },
+            {
+              "name": "Get Messages - Conversation Not Found",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/conversations/000000000000000000000000/messages",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "conversations", "000000000000000000000000", "messages"]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Conversation not found\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Read Receipts",
+      "item": [
+        {
+          "name": "Mark Message Delivered",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/messages/6abbaca5e508ecc614ed867d/delivered",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "messages", "6abbaca5e508ecc614ed867d", "delivered"]
+            },
+            "description": "Marks a message as delivered for the logged-in recipient. Also broadcasts a message:status event to the sender over Socket.IO if they're online."
+          },
+          "response": [
+            {
+              "name": "Mark Delivered - Success",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/messages/6abbaca5e508ecc614ed867d/delivered",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "messages", "6abbaca5e508ecc614ed867d", "delivered"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Message marked as delivered\",\n  \"data\": {\n    \"message\": { \"_id\": \"6abbaca5e508ecc614ed867d\" },\n    \"recipient\": {\n      \"userId\": \"6abba7e7e508ecc614ed867a\",\n      \"status\": \"delivered\",\n      \"deliveredAt\": \"2026-09-29T12:25:00.000Z\",\n      \"readAt\": null\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Mark Message Read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/messages/6abbaca5e508ecc614ed867d/read",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "messages", "6abbaca5e508ecc614ed867d", "read"]
+            },
+            "description": "Marks a message as read for the logged-in recipient. Also broadcasts a message:status event to the sender over Socket.IO if they're online."
+          },
+          "response": [
+            {
+              "name": "Mark Read - Success",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/messages/6abbaca5e508ecc614ed867d/read",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "messages", "6abbaca5e508ecc614ed867d", "read"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Message marked as read\",\n  \"data\": {\n    \"message\": { \"_id\": \"6abbaca5e508ecc614ed867d\" },\n    \"recipient\": {\n      \"userId\": \"6abba7e7e508ecc614ed867a\",\n      \"status\": \"read\",\n      \"deliveredAt\": \"2026-09-29T12:25:00.000Z\",\n      \"readAt\": \"2026-09-29T12:26:10.000Z\"\n    }\n  }\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -17,13 +17,11 @@ router.post(
   protect,
   (req, res, next) => {
     const { error } = messageSchema.validate(req.body);
-
     if (error) {
       return res.status(400).json({
-        mssaage: error.details[0].message,
+        message: error.details[0].message,
       });
     }
-
     next();
   },
   sendMessage

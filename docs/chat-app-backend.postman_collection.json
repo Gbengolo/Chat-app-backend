@@ -472,7 +472,7 @@
               "code": 200,
               "_postman_previewlanguage": "json",
               "header": [{ "key": "Content-Type", "value": "application/json" }],
-              "body": "{\n  \"success\": true,\n  \"message\": \"Message marked as delivered\",\n  \"data\": {\n    \"message\": { \"_id\": \"6abbaca5e508ecc614ed867d\" },\n    \"recipient\": {\n      \"userId\": \"6abba7e7e508ecc614ed867a\",\n      \"status\": \"delivered\",\n      \"deliveredAt\": \"2026-09-29T12:25:00.000Z\",\n      \"readAt\": null\n    }\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"message\": \"Message marked as delivered\",\n  \"data\": {\n    \"message\": {\n      \"_id\": \"6abeada336d017b7b02a83fd\",\n      \"conversationId\": \"6abead0736d017b7b02a83fc\",\n      \"senderId\": \"6abc08148295124199c45bbb\",\n      \"content\": \"Hey bro, any update\",\n      \"recipientStatuses\": [\n        {\n          \"userId\": \"6ab7ea29d6527ccb96a6572e\",\n          \"status\": \"delivered\",\n          \"deliveredAt\": \"2026-10-01T19:05:00.610Z\",\n          \"readAt\": null\n        }\n      ],\n      \"createdAt\": \"2026-10-01T18:59:47.697Z\",\n      \"updatedAt\": \"2026-10-01T19:05:00.612Z\",\n      \"__v\": 0\n    },\n    \"recipient\": {\n      \"userId\": \"6ab7ea29d6527ccb96a6572e\",\n      \"status\": \"delivered\",\n      \"deliveredAt\": \"2026-10-01T19:05:00.610Z\",\n      \"readAt\": null\n    }\n  }\n}"
             }
           ]
         },
@@ -508,7 +508,7 @@
               "code": 200,
               "_postman_previewlanguage": "json",
               "header": [{ "key": "Content-Type", "value": "application/json" }],
-              "body": "{\n  \"success\": true,\n  \"message\": \"Message marked as read\",\n  \"data\": {\n    \"message\": { \"_id\": \"6abbaca5e508ecc614ed867d\" },\n    \"recipient\": {\n      \"userId\": \"6abba7e7e508ecc614ed867a\",\n      \"status\": \"read\",\n      \"deliveredAt\": \"2026-09-29T12:25:00.000Z\",\n      \"readAt\": \"2026-09-29T12:26:10.000Z\"\n    }\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"message\": \"Message marked as read\",\n  \"data\": {\n    \"message\": {\n      \"_id\": \"6abeada336d017b7b02a83fd\",\n      \"conversationId\": \"6abead0736d017b7b02a83fc\",\n      \"senderId\": \"6abc08148295124199c45bbb\",\n      \"content\": \"Hey bro, any update\",\n      \"recipientStatuses\": [\n        {\n          \"userId\": \"6ab7ea29d6527ccb96a6572e\",\n          \"status\": \"read\",\n          \"deliveredAt\": \"2026-10-01T19:05:00.610Z\",\n          \"readAt\": \"2026-10-01T19:07:07.328Z\"\n        }\n      ],\n      \"createdAt\": \"2026-10-01T18:59:47.697Z\",\n      \"updatedAt\": \"2026-10-01T19:07:07.328Z\",\n      \"__v\": 0\n    },\n    \"recipient\": {\n      \"userId\": \"6ab7ea29d6527ccb96a6572e\",\n      \"status\": \"read\",\n      \"deliveredAt\": \"2026-10-01T19:05:00.610Z\",\n      \"readAt\": \"2026-10-01T19:07:07.328Z\"\n    }\n  }\n}"
             }
           ]
         }

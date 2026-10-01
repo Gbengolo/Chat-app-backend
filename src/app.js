@@ -1,5 +1,7 @@
 require('dotenv').config();
 
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./utils/swagger');
 const http = require('http');
 const express = require('express');
 const { Server } = require('socket.io');
@@ -12,6 +14,7 @@ const messageRoutes = require('./routes/messageRoutes');
 
 const { verifyToken } = require('./utils/token');
 const initializeSocket = require('./socket/socketHandler');
+const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
 const server = http.createServer(app);
@@ -26,6 +29,8 @@ const io = new Server(server, {
 // connectDB();
 
 app.use(express.json());
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Test route
 app.get('/', (req, res) => {
@@ -118,21 +123,16 @@ io.on('connection', (socket) => {
   });
 });
 
-<<<<<<< HEAD
-if (require.main === module) {
-  server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
-}
-
-module.exports = app;
-=======
-// Initialize read-receipt/message-status socket handlers
+//Intialize read-receipt/message-status socket handlers
+app.use(errorHandler);
 initializeSocket(io, onlineUsers);
 
 const PORT = process.env.PORT || 5000;
 
-server.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
->>>>>>> origin/main
+if (require.main === module) {
+  server.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
+
+module.exports = app;

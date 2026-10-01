@@ -1,3 +1,4 @@
+const { messageSchema } = require('../validations/MessageValidation');
 const express = require('express');
 
 const {
@@ -14,6 +15,17 @@ const router = express.Router();
 router.post(
   '/conversations/:conversationId/messages',
   protect,
+  (req, res, next) => {
+    const { error } = messageSchema.validate(req.body);
+
+    if (error) {
+      return res.status(400).json({
+        mssaage: error.details[0].message,
+      });
+    }
+
+    next();
+  },
   sendMessage
 );
 

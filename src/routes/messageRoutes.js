@@ -1,4 +1,4 @@
-const { messageSchema } = require('../validations/MessageValidation');
+const { messageSchema } = require('../validations/messageValidation');
 const express = require('express');
 
 const {

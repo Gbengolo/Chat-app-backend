@@ -6,7 +6,7 @@ const {
 } = require('../controllers/ConversationController');
 
 const { protect } = require('../middleware/auth.js');
-const { conversationSchema } = require('../validations/ConversationValidation');
+const { conversationSchema } = require('../validations/conversationValidation');
 
 const router = express.Router();
 

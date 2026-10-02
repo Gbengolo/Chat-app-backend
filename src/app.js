@@ -28,7 +28,7 @@ const io = new Server(server, {
 });
 
 // Added: connect to MongoDB on server startup
-// connectDB();
+connectDB();
 
 app.use(express.json());
 

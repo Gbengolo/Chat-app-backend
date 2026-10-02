@@ -1,4 +1,5 @@
 require('dotenv').config();
+const cors = require('cors');
 
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./utils/swagger');
@@ -17,6 +18,7 @@ const initializeSocket = require('./socket/socketHandler');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
+app.use(cors());
 const server = http.createServer(app);
 
 const io = new Server(server, {

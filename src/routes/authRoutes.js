@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { register, login, getMe } = require('../controllers/authController');
+const { register, login, getMe, findByEmail } = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
 const validate = require('../middleware/validate');
 const { registerSchema, loginSchema } = require('../validations/authValidation');
@@ -92,5 +92,6 @@ router.post('/login', validate(loginSchema), login);
  *         description: Unauthorized
  */
 router.get('/me', protect, getMe);
+router.get('/users/find', protect, findByEmail);
 
 module.exports = router;

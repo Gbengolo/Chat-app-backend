@@ -46,4 +46,25 @@ const getMe = async (req, res) => {
   });
 };
 
-module.exports = { register, login, getMe };
+
+const findByEmail = async (req, res) => {
+  try {
+    const { email } = req.query;
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Email is required' });
+    }
+    const User = require('../models/User');
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'No user found with that email' });
+    }
+    return res.status(200).json({
+      success: true,
+      data: { id: user._id, username: user.username, email: user.email },
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+module.exports = { register, login, getMe, findByEmail };

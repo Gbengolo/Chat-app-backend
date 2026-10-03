@@ -226,14 +226,19 @@
     if (ok) { conversations = data.data || []; renderConvoList(); }
   }
 
+  function participantId(p) { return typeof p === "object" ? p._id : p; }
+  function participantLabel(p) { return typeof p === "object" ? (p.email || p.username || p._id) : p; }
+
   function renderConvoList() {
     const list = $("convoList");
     list.innerHTML = "";
     conversations.forEach((c) => {
-      const otherId = c.participants.find((p) => p !== me.id) || c.participants[0];
+      const other = c.participants.find((p) => participantId(p) !== me.id) || c.participants[0];
+      const otherId = participantId(other);
+      const label = participantLabel(other);
       const row = document.createElement("div");
       row.className = "convo-item" + (activeConvo && activeConvo._id === c._id ? " active" : "");
-      row.innerHTML = `<span class="dot${onlineUsers.has(otherId) ? " online" : ""}"></span><span class="convo-id">${otherId}</span>`;
+      row.innerHTML = `<span class="dot${onlineUsers.has(otherId) ? " online" : ""}"></span><span class="convo-id">${escapeHtml(label)}</span>`;
       row.onclick = () => openConvo(c);
       list.appendChild(row);
     });

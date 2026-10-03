@@ -15,6 +15,9 @@ const conversationSchema = new mongoose.Schema(
       ref: "Message",
       default: null,
     },
+
+    type: { type: String, enum: ['direct', 'group'], default: 'direct' },
+    name: { type: String, trim: true, default: null },
   },
   {
     timestamps: true,

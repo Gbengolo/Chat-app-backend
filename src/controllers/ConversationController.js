@@ -1,62 +1,44 @@
 const Conversation = require('../models/conversation');
 
-// Create a new conversation
 const createConversation = async (req, res) => {
     try {
-        const { participantId } = req.body;
+        const { participantId, participantIds, name } = req.body;
+        let ids = Array.isArray(participantIds) ? participantIds : (participantId ? [participantId] : []);
+        ids = [...new Set(ids.map(String))];
 
-        if (!participantId) {
-            return res.status(400).json({
-                success: false,
-                message: 'Participant ID is required'
-            });
+        if (ids.length === 0) {
+            return res.status(400).json({ success: false, message: 'At least one participant is required' });
         }
 
-        // The logged-in user's ID will come from authentication middleware
-        const currentUserId = req.user._id;
+        const currentUserId = req.user._id.toString();
+        const allParticipants = [...new Set([currentUserId, ...ids])];
+        const isGroup = allParticipants.length > 2;
 
-        // Check if a conversation already exists
-        const existingConversation = await Conversation.findOne({
-            participants: {
-                $all: [currentUserId, participantId]
+        if (!isGroup) {
+            const existingConversation = await Conversation.findOne({
+                type: 'direct',
+                participants: { $all: allParticipants, $size: 2 }
+            });
+            if (existingConversation) {
+                return res.status(200).json({ success: true, message: 'Conversation already exists', data: existingConversation });
             }
-        });
-
-        if (existingConversation) {
-            return res.status(200).json({
-                success: true,
-                message: 'Conversation already exists',
-                data: existingConversation
-            });
         }
 
-        // Create a new conversation
         const conversation = await Conversation.create({
-            participants: [currentUserId, participantId]
+            participants: allParticipants,
+            type: isGroup ? 'group' : 'direct',
+            name: isGroup ? (name || null) : null
         });
 
-        return res.status(201).json({
-            success: true,
-            message: 'Conversation created successfully',
-            data: conversation
-        });
-
+        return res.status(201).json({ success: true, message: 'Conversation created successfully', data: conversation });
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: 'Failed to create conversation',
-            error: error.message
-        });
+        return res.status(500).json({ success: false, message: 'Failed to create conversation', error: error.message });
     }
 };
 
-
-// Get all conversations for the logged-in user
 const getConversations = async (req, res) => {
     try {
-        // The logged-in user's ID will come from authentication middleware
         const currentUserId = req.user._id;
-
         const conversations = await Conversation.find({
             participants: currentUserId
         })
@@ -68,7 +50,6 @@ const getConversations = async (req, res) => {
             count: conversations.length,
             data: conversations
         });
-
     } catch (error) {
         return res.status(500).json({
             success: false,
@@ -77,7 +58,6 @@ const getConversations = async (req, res) => {
         });
     }
 };
-
 
 module.exports = {
     createConversation,

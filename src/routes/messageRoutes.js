@@ -12,6 +12,53 @@ const { protect } = require('../middleware/auth');
 
 const router = express.Router();
 
+/**
+ * @swagger
+ * /api/conversations/{conversationId}/messages:
+ *   post:
+ *     summary: Send a message
+ *     tags:
+ *       - Messages
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: conversationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - content
+ *             properties:
+ *               content:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Message sent
+ *   get:
+ *     summary: Get paginated message history
+ *     tags:
+ *       - Messages
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: conversationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Paginated messages
+ */
+
+
 router.post(
   '/conversations/:conversationId/messages',
   protect,

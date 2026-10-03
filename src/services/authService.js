@@ -55,4 +55,14 @@ const loginUser = async ({ email, password }) => {
   };
 };
 
-module.exports = { registerUser, loginUser };
+const resetPassword = async ({ email, newPassword }) => {
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new AppError('No account found with that email', 404);
+  }
+  user.password = newPassword;
+  await user.save();
+  return { message: 'Password reset successful' };
+};
+
+module.exports = { registerUser, loginUser, resetPassword };

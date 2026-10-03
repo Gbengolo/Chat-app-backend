@@ -32,6 +32,17 @@ const login = async (req, res, next) => {
   }
 };
 
+
+const resetPassword = async (req, res, next) => {
+  try {
+    await authService.resetPassword(req.body);
+    res.status(200).json({ success: true, message: 'Password reset successful', data: null });
+  } catch (err) {
+    if (err.statusCode) return res.status(err.statusCode).json({ success: false, message: err.message });
+    next(err);
+  }
+};
+
 const getMe = async (req, res) => {
   res.status(200).json({
     success: true,
@@ -67,4 +78,4 @@ const findByEmail = async (req, res) => {
   }
 };
 
-module.exports = { register, login, getMe, findByEmail };
+module.exports = { register, login, getMe, findByEmail, resetPassword };

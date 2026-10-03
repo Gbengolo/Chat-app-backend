@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 
-const { register, login, getMe, findByEmail } = require('../controllers/authController');
+const { register, login, getMe, findByEmail, resetPassword } = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
 const validate = require('../middleware/validate');
-const { registerSchema, loginSchema } = require('../validations/authValidation');
+const { registerSchema, loginSchema, resetPasswordSchema } = require('../validations/authValidation');
 
 // Public routes
 
@@ -74,6 +74,37 @@ router.post('/register', validate(registerSchema), register);
  */
 router.post('/login', validate(loginSchema), login);
 
+/**
+ * @swagger
+ * /api/auth/reset-password:
+ *   post:
+ *     summary: Reset a user's password
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - newPassword
+ *             properties:
+ *               email:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Password reset successful
+ *       404:
+ *         description: No account found with that email
+ */
+router.post('/reset-password', validate(resetPasswordSchema), resetPassword);
+
+router.get('/users/find', protect, findByEmail);
+
 // Protected route (example of using the `protect` middleware)
 
 /**
@@ -92,6 +123,5 @@ router.post('/login', validate(loginSchema), login);
  *         description: Unauthorized
  */
 router.get('/me', protect, getMe);
-router.get('/users/find', protect, findByEmail);
 
 module.exports = router;

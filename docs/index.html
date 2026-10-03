@@ -65,12 +65,18 @@
   #sidebar header .me { font-weight: 600; font-size: 0.95rem; }
   #sidebar header .me small { display: block; color: var(--muted); font-weight: 400; font-size: 0.72rem; }
   #logout { background: none; border: none; color: var(--muted); font-size: 0.78rem; }
-  #newConvo { padding: 10px 12px; border-bottom: 1px solid var(--border); display: flex; gap: 6px; }
-  #newConvo input {
+  #newConvo { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  .newConvo-row { display: flex; gap: 6px; }
+  .newConvo-row input {
     flex: 1; background: var(--panel2); border: 1px solid var(--border); color: var(--text);
     padding: 7px 9px; border-radius: 6px; font-size: 0.8rem; outline: none;
   }
-  #newConvo button { background: var(--panel2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 0 10px; }
+  .newConvo-row button { background: var(--panel2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 0 10px; }
+  #groupToggle { background: none; border: none; color: var(--muted); font-size: 0.72rem; margin-top: 6px; padding: 0; }
+  #groupToggle.active { color: var(--accent); }
+  #groupFields { display: none; margin-top: 8px; gap: 6px; flex-direction: column; }
+  #groupFields.open { display: flex; }
+  .badge { font-size: 0.65rem; color: var(--accent); border: 1px solid var(--accent); border-radius: 4px; padding: 1px 5px; margin-left: 6px; }
   #convoList { flex: 1; overflow-y: auto; }
   .convo-item {
     padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; display: flex;
@@ -136,8 +142,16 @@
       <button id="logout">Log out</button>
     </header>
     <div id="newConvo">
-      <input id="participantEmail" placeholder="Start chat with email" type="email">
-      <button id="startConvo">Start</button>
+      <div class="newConvo-row">
+        <input id="participantEmail" placeholder="Start chat with email" type="email">
+        <button id="startConvo">Start</button>
+      </div>
+      <button id="groupToggle">+ New group</button>
+      <div id="groupFields">
+        <input id="groupEmails" placeholder="Emails, comma separated">
+        <input id="groupName" placeholder="Group name (optional)">
+        <button id="startGroup" style="background:var(--accent);color:#0b1510;border:none;font-weight:600;padding:7px;border-radius:6px;">Create group</button>
+      </div>
     </div>
     <div id="convoList"></div>
   </div>
@@ -229,20 +243,34 @@
   function participantId(p) { return typeof p === "object" ? p._id : p; }
   function participantLabel(p) { return typeof p === "object" ? (p.email || p.username || p._id) : p; }
 
+  function convoLabel(c) {
+    if (c.type === "group") return c.name || c.participants.map(participantLabel).join(", ");
+    const other = c.participants.find((p) => participantId(p) !== me.id) || c.participants[0];
+    return participantLabel(other);
+  }
+  function convoOtherIds(c) {
+    return c.participants.filter((p) => participantId(p) !== me.id).map(participantId);
+  }
+
   function renderConvoList() {
     const list = $("convoList");
     list.innerHTML = "";
     conversations.forEach((c) => {
-      const other = c.participants.find((p) => participantId(p) !== me.id) || c.participants[0];
-      const otherId = participantId(other);
-      const label = participantLabel(other);
+      const others = convoOtherIds(c);
+      const anyOnline = others.some((id) => onlineUsers.has(id));
+      const label = convoLabel(c);
       const row = document.createElement("div");
       row.className = "convo-item" + (activeConvo && activeConvo._id === c._id ? " active" : "");
-      row.innerHTML = `<span class="dot${onlineUsers.has(otherId) ? " online" : ""}"></span><span class="convo-id">${escapeHtml(label)}</span>`;
+      row.innerHTML = `<span class="dot${anyOnline ? " online" : ""}"></span><span class="convo-id">${escapeHtml(label)}${c.type === "group" ? '<span class="badge">GROUP</span>' : ""}</span>`;
       row.onclick = () => openConvo(c);
       list.appendChild(row);
     });
   }
+
+  $("groupToggle").onclick = () => {
+    $("groupToggle").classList.toggle("active");
+    $("groupFields").classList.toggle("open");
+  };
 
   $("startConvo").onclick = async () => {
     const email = $("participantEmail").value.trim();
@@ -264,9 +292,36 @@
     }
   };
 
+  $("startGroup").onclick = async () => {
+    const raw = $("groupEmails").value.trim();
+    if (!raw) return;
+    const emails = raw.split(",").map((e) => e.trim()).filter(Boolean);
+    if (emails.length < 2) { alert("Add at least two emails for a group."); return; }
+    const ids = [];
+    for (const email of emails) {
+      const lookup = await api("/api/auth/users/find?email=" + encodeURIComponent(email));
+      if (!lookup.ok) { alert(`Could not find a user with email: ${email}`); return; }
+      ids.push(lookup.data.data.id);
+    }
+    const name = $("groupName").value.trim();
+    const { ok, data } = await api("/api/conversations", {
+      method: "POST",
+      body: JSON.stringify({ participantIds: ids, name: name || undefined })
+    });
+    if (ok) {
+      $("groupEmails").value = ""; $("groupName").value = "";
+      $("groupFields").classList.remove("open"); $("groupToggle").classList.remove("active");
+      await loadConversations();
+      const c = conversations.find((x) => x._id === data.data._id) || data.data;
+      openConvo(c);
+    } else {
+      alert(data.message || "Could not create group.");
+    }
+  };
+
   function buildChatUI() {
     $("chat").innerHTML = `
-      <div id="chatHeader"><button id="backBtn">&larr;</button>Conversation</div>
+      <div id="chatHeader"><button id="backBtn">&larr;</button><span id="chatTitle">Conversation</span></div>
       <div id="messages"></div>
       <div id="typingRow"></div>
       <div id="composer">
@@ -287,6 +342,7 @@
     activeConvo = c;
     appScreen.classList.add("chat-open");
     buildChatUI();
+    $("chatTitle").textContent = convoLabel(c);
     if (socket) socket.emit("conversation:join", c._id);
     renderConvoList();
     const { ok, data } = await api(`/api/conversations/${c._id}/messages`);
@@ -326,6 +382,7 @@
 
   function connectSocket() {
     socket = io(API, { auth: { token } });
+    socket.on("presence:init", (ids) => { onlineUsers = new Set(ids); renderConvoList(); });
     socket.on("user:online", (id) => { onlineUsers.add(id); renderConvoList(); });
     socket.on("user:offline", (id) => { onlineUsers.delete(id); renderConvoList(); });
     socket.on("typing:start", (d) => {

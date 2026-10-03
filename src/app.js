@@ -92,6 +92,7 @@ io.on('connection', (socket) => {
   onlineUsers.set(socket.userId, socket.id);
 
   io.emit('user:online', socket.userId);
+  socket.emit('presence:init', Array.from(onlineUsers.keys()));
 
   // Join conversation room
   socket.on('conversation:join', (conversationId) => {

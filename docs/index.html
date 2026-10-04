@@ -111,7 +111,9 @@
   .convo-item.active { background: var(--panel2); border-left: 3px solid var(--accent); padding-left: 13px; }
   .dot { width: 9px; height: 9px; border-radius: 50%; background: #3a3f4c; flex-shrink: 0; box-shadow: 0 0 0 3px transparent; transition: box-shadow 0.2s; }
   .dot.online { background: var(--accent); box-shadow: 0 0 0 3px rgba(79,209,165,0.18); }
-  .convo-id { font-size: 0.82rem; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .convo-id { font-size: 0.82rem; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+  .convo-item.unread .convo-id { font-weight: 700; }
+  .unread-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent2); flex-shrink: 0; }
 
   #chat { flex: 1; display: flex; flex-direction: column; min-width: 0; }
   #chatHeader { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; }
@@ -227,6 +229,9 @@
   let activeConvo = null;
   let onlineUsers = new Set();
   let typingTimeout = null;
+  let sidebarPollTimer = null;
+  let lastKnownUpdatedAt = {};
+  let unreadConvoIds = new Set();
 
   try { token = localStorage.getItem("gchat_token"); me = JSON.parse(localStorage.getItem("gchat_me") || "null"); } catch (e) {}
 
@@ -241,6 +246,7 @@
     $("meAvatar").textContent = (me.username || "?").slice(0, 2).toUpperCase();
     connectSocket();
     loadConversations();
+    sidebarPollTimer = setInterval(loadConversations, 5000);
   }
 
   if (token && me) showApp();
@@ -314,6 +320,7 @@
   $("logout").onclick = () => {
     try { localStorage.removeItem("gchat_token"); localStorage.removeItem("gchat_me"); } catch (e) {}
     if (pollTimer) clearInterval(pollTimer);
+    if (sidebarPollTimer) clearInterval(sidebarPollTimer);
     if (socket) socket.disconnect();
     location.reload();
   };
@@ -329,7 +336,17 @@
 
   async function loadConversations() {
     const { ok, data } = await api("/api/conversations");
-    if (ok) { conversations = data.data || []; renderConvoList(); }
+    if (!ok) return;
+    const list = data.data || [];
+    list.forEach((c) => {
+      const prev = lastKnownUpdatedAt[c._id];
+      if (prev && prev !== c.updatedAt && (!activeConvo || activeConvo._id !== c._id)) {
+        unreadConvoIds.add(c._id);
+      }
+      lastKnownUpdatedAt[c._id] = c.updatedAt;
+    });
+    conversations = list;
+    renderConvoList();
   }
 
   function participantId(p) { return typeof p === "object" ? p._id : p; }
@@ -355,8 +372,9 @@
         const anyOnline = others.some((id) => onlineUsers.has(id));
         const label = convoLabel(c);
         const row = document.createElement("div");
-        row.className = "convo-item" + (activeConvo && activeConvo._id === c._id ? " active" : "");
-        row.innerHTML = `<span class="dot${anyOnline ? " online" : ""}"></span><span class="convo-id">${escapeHtml(label)}${c.type === "group" ? '<span class="badge">GROUP</span>' : ""}</span>`;
+        const isUnread = unreadConvoIds.has(c._id);
+        row.className = "convo-item" + (activeConvo && activeConvo._id === c._id ? " active" : "") + (isUnread ? " unread" : "");
+        row.innerHTML = `<span class="dot${anyOnline ? " online" : ""}"></span><span class="convo-id">${escapeHtml(label)}${c.type === "group" ? '<span class="badge">GROUP</span>' : ""}</span>${isUnread ? '<span class="unread-dot"></span>' : ""}`;
         row.onclick = () => openConvo(c);
         list.appendChild(row);
       });
@@ -448,6 +466,7 @@
     activeConvo = c;
     knownMessageIds = new Set();
     lastRenderedDay = null;
+    unreadConvoIds.delete(c._id);
     appScreen.classList.add("chat-open");
     buildChatUI();
     $("chatTitle").textContent = convoLabel(c);

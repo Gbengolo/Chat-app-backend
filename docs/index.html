@@ -159,7 +159,7 @@
   <div class="auth-card">
     <div class="logo-mark">G19</div>
     <h1>Group 19 Chat</h1>
-    <p class="sub">Real-time chat backend demo</p>
+    <p class="sub">Real-time messaging, built for teams</p>
     <div class="tabs" id="authTabs">
       <button id="tabLogin" class="active">Log in</button>
       <button id="tabRegister">Register</button>
@@ -182,7 +182,7 @@
       <div class="success" id="forgotSuccess"></div>
       <button class="link-btn" id="showLogin">Back to log in</button>
     </div>
-    <div class="api-note">API: <span id="apiUrlLabel"></span></div>
+
   </div>
 </div>
 
@@ -222,7 +222,6 @@
 <script>
 (function () {
   const API = "https://chat-app-backend-ukcp.onrender.com";
-  document.getElementById("apiUrlLabel").textContent = API;
 
   let token = null, me = null, socket = null;
   let conversations = [];
